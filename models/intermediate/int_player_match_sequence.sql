@@ -20,7 +20,12 @@ filtered as (
     select p.*
     from performance p
     inner join tracked_players t on p.puuid = t.puuid
-    where p.game_duration_seconds >= 300
+    -- Same queue filter as fct_participant_performance. Without it the trend
+    -- models would describe a different set of matches than the performance
+    -- fact: ARAM and Arena games would be missing from one and present in the
+    -- other, with nothing to flag the disagreement.
+    where p.queue_id in ({{ var('included_queue_ids') | join(', ') }})
+      and p.game_duration_seconds >= 300
       and not p.ended_in_early_surrender
 
 ),

@@ -26,6 +26,9 @@ SEED = 20260919
 CHAMPION_IDS = [1, 2, 3, 4, 5, 11, 17, 18, 22, 51, 64, 84, 86, 103, 157, 222, 238, 412, 777, 875]
 POSITIONS = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"]
 QUEUES = [420, 440]
+# ARAM is deliberately outside included_queue_ids, so fixtures carry a few to
+# prove the queue filter is applied consistently across the marts.
+EXCLUDED_QUEUE = 450
 PATCHES = ["14.17.600.1234", "14.18.615.9137"]
 
 TRACKED = [
@@ -58,7 +61,7 @@ def build(matches_per_player: int = 14) -> dict[str, list[dict]]:
                     "match_id": match_id,
                     "data_version": "2",
                     "platform_id": "NA1",
-                    "queue_id": rng.choice(QUEUES),
+                    "queue_id": EXCLUDED_QUEUE if n % 7 == 6 else rng.choice(QUEUES),
                     "game_mode": "CLASSIC",
                     "game_type": "MATCHED_GAME",
                     "map_id": 11,
