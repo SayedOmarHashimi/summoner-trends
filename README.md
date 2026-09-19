@@ -101,13 +101,20 @@ pip install -r requirements.txt
 cp .env.example .env
 # edit .env: add your Riot API key and Riot ID
 
-# 1. extract
+# 1. refresh champion reference data (needed before the first build)
+python -m extraction.fetch_static_data
+
+# 2. extract
 python -m extraction.pull_matches --count 100
 
-# 2. transform
+# 3. transform
 dbt deps --profiles-dir .
 dbt build --profiles-dir .
 ```
+
+Step 1 matters: the committed `champion_static.csv` is a small starter set, and
+real match history covers every champion in the game. Skipping it makes the
+`dim_champions` relationship test fail on any champion the seed is missing.
 
 `dbt build` runs models, seeds, snapshots, and the full test suite against the
 local DuckDB file. Neither the warehouse file nor the raw extraction output is

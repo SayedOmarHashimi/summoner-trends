@@ -11,10 +11,17 @@ Retry-After when one arrives anyway — lives in `riot_client`.
 
 from __future__ import annotations
 
+import logging
 import threading
 import time
 from collections import deque
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
+
+# Waits longer than this are announced. A long silent pause is
+# indistinguishable from a hang, so say what is happening.
+LOG_WAIT_THRESHOLD_SECONDS = 2.0
 
 # Personal key defaults, per region.
 PERSONAL_KEY_LIMITS: tuple[tuple[int, float], ...] = (
@@ -72,16 +79,29 @@ class RateLimiter:
         while True:
             with self._lock:
                 now = time.monotonic()
-                wait = max(
-                    [w.wait_seconds(now) for w in self._windows]
-                    + [self._blocked_until - now]
-                )
+                penalty_wait = self._blocked_until - now
+                window_waits = [w.wait_seconds(now) for w in self._windows]
+                wait = max(window_waits + [penalty_wait])
                 if wait <= 0:
                     for window in self._windows:
                         window.record(now)
                     return
+                reason = self._describe_wait(now, wait, penalty_wait, window_waits)
+            if wait >= LOG_WAIT_THRESHOLD_SECONDS:
+                logger.info("Rate limit reached — waiting %.0fs before next request (%s).", wait, reason)
             # Sleep outside the lock so other threads can make progress.
             time.sleep(wait + self._safety_margin)
+
+    def _describe_wait(
+        self, now: float, wait: float, penalty_wait: float, window_waits: list[float]
+    ) -> str:
+        """Name whichever limit is holding us back, for the log line."""
+        if penalty_wait >= wait:
+            return "server asked us to back off"
+        for window, window_wait in zip(self._windows, window_waits):
+            if window_wait >= wait:
+                return f"local limit {len(window.hits)}/{window.limit} per {window.seconds:g}s"
+        return "local limit"
 
     def penalize(self, seconds: float) -> None:
         """Block all requests for `seconds` — used when the API returns 429."""
