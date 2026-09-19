@@ -1,0 +1,21 @@
+champion_id,champion_key,champion_name,champion_title,primary_role,secondary_role,resource_type,data_dragon_version
+1,Annie,Annie,the Dark Child,Mage,,Mana,14.18.1
+2,Olaf,Olaf,the Berserker,Fighter,Tank,Mana,14.18.1
+3,Galio,Galio,the Colossus,Tank,Mage,Mana,14.18.1
+4,TwistedFate,Twisted Fate,the Card Master,Mage,,Mana,14.18.1
+5,XinZhao,Xin Zhao,the Seneschal of Demacia,Fighter,Assassin,Mana,14.18.1
+11,MasterYi,Master Yi,the Wuju Bladesman,Assassin,Fighter,Mana,14.18.1
+17,Teemo,Teemo,the Swift Scout,Marksman,Assassin,Mana,14.18.1
+18,Tristana,Tristana,the Yordle Gunner,Marksman,Assassin,Mana,14.18.1
+22,Ashe,Ashe,the Frost Archer,Marksman,Support,Mana,14.18.1
+51,Caitlyn,Caitlyn,the Sheriff of Piltover,Marksman,,Mana,14.18.1
+64,LeeSin,Lee Sin,the Blind Monk,Fighter,Assassin,Energy,14.18.1
+84,Akali,Akali,the Rogue Assassin,Assassin,,Energy,14.18.1
+86,Garen,Garen,the Might of Demacia,Fighter,Tank,None,14.18.1
+103,Ahri,Ahri,the Nine-Tailed Fox,Mage,Assassin,Mana,14.18.1
+157,Yasuo,Yasuo,the Unforgiven,Fighter,Assassin,Flow,14.18.1
+222,Jinx,Jinx,the Loose Cannon,Marksman,,Mana,14.18.1
+238,Zed,Zed,the Master of Shadows,Assassin,Fighter,Energy,14.18.1
+412,Thresh,Thresh,the Chain Warden,Support,Fighter,Mana,14.18.1
+777,Yone,Yone,the Unforgotten,Assassin,Fighter,None,14.18.1
+875,Sett,Sett,the Boss,Fighter,Tank,Grit,14.18.1

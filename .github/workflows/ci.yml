@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets-guard:
+    name: No committed secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail if .env is tracked
+        run: |
+          if git ls-files --error-unmatch .env 2>/dev/null; then
+            echo "::error::.env is tracked by git. It holds the Riot API key and must stay ignored."
+            exit 1
+          fi
+          echo ".env is not tracked."
+
+      - name: Fail if a Riot API key was committed
+        run: |
+          # Placeholder keys in .env.example are all zeroes and are allowed.
+          if git grep -nIE 'RGAPI-[0-9a-f]{8}-' -- . ':!.env.example' \
+              | grep -v 'RGAPI-00000000'; then
+            echo "::error::A Riot API key looks committed. Rotate it immediately at https://developer.riotgames.com/."
+            exit 1
+          fi
+          echo "No Riot API key found in the tree."
+
+  python:
+    name: Python tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest
+
+      - name: Run unit tests
+        run: pytest
+
+  dbt:
+    name: dbt build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate fixture warehouse
+        # CI never calls the Riot API: that would need a key in the repo and
+        # would spend rate limit on every push. Synthetic data in the same
+        # shape exercises every model and test instead.
+        run: python ci/generate_fixtures.py --output data/ci --duckdb ci.duckdb
+
+      - name: Install dbt packages
+        run: dbt deps --profiles-dir .
+
+      - name: Check models parse
+        run: dbt parse --profiles-dir . --target ci
+
+      - name: Build models, snapshots, seeds, and tests
+        env:
+          DUCKDB_PATH: ci.duckdb
+        run: dbt build --profiles-dir . --target ci
+
+      - name: Upload dbt artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-target
+          path: target/
+          retention-days: 7

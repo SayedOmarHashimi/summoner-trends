@@ -1,0 +1,44 @@
+name: summoner_trends
+version: 1.0.0
+config-version: 2
+
+profile: summoner_trends
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+analysis-paths: ["analyses"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  summoner_trends:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: ephemeral
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
+
+seeds:
+  summoner_trends:
+    +schema: seeds
+
+snapshots:
+  summoner_trends:
+    +target_schema: snapshots
+
+vars:
+  # Rolling window (in matches) used by fct_player_rolling_trends.
+  rolling_window_matches: 10
+  # Minimum number of prior matches before a baseline delta is reported.
+  min_baseline_matches: 5
+  # Queues kept in the marts. 420 = ranked solo/duo, 440 = ranked flex, 400 = normal draft.
+  included_queue_ids: [400, 420, 440]

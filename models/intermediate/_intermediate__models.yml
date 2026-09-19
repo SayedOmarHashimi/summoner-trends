@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: int_match_team_totals
+    description: Per-team sums used as denominators for share metrics.
+    columns:
+      - name: match_id
+        tests: [not_null]
+      - name: team_participant_count
+        description: Should be 5 in a standard Summoner's Rift game.
+        tests: [not_null]
+
+  - name: int_participant_metrics
+    description: >
+      Participant rows joined to match and team context, with per-minute rates
+      and team-share metrics derived. Descriptive only.
+    columns:
+      - name: participant_key
+        tests: [not_null, unique]
+      - name: damage_share
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+              where: "damage_share is not null"
+
+  - name: int_player_match_sequence
+    description: >
+      A player's matches in chronological order, with remakes and sub-5-minute
+      games removed so rolling windows are not distorted.
+    columns:
+      - name: participant_key
+        tests: [not_null, unique]
+      - name: match_sequence_number
+        tests: [not_null]
+
+  - name: int_champion_match_appearances
+    description: One row per champion per match per team, flagged as picked or banned.
+    columns:
+      - name: champion_id
+        tests: [not_null]

@@ -1,0 +1,139 @@
+version: 2
+
+models:
+  - name: dim_champions
+    description: Champion reference data sourced from Data Dragon.
+    columns:
+      - name: champion_id
+        tests: [not_null, unique]
+      - name: champion_name
+        tests: [not_null]
+
+  - name: dim_players
+    description: One row per tracked account, keyed on PUUID.
+    columns:
+      - name: puuid
+        tests: [not_null, unique]
+      - name: riot_id
+        tests: [not_null]
+      - name: matches_extracted
+        tests: [not_null]
+
+  - name: dim_matches
+    description: One row per match with queue, patch, timing, and outcome context.
+    columns:
+      - name: match_id
+        tests: [not_null, unique]
+      - name: patch
+        tests: [not_null]
+      - name: winning_team_id
+        tests:
+          - accepted_values:
+              values: [100, 200]
+              quote: false
+              where: "winning_team_id is not null"
+
+  - name: fct_participant_performance
+    description: >
+      One row per player per match: KDA, damage share, gold efficiency, CS/min,
+      vision score, kill participation, duration, and result. Descriptive
+      metrics only — no rating, ranking, or grade is derived.
+    columns:
+      - name: participant_key
+        tests: [not_null, unique]
+      - name: match_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_matches')
+              field: match_id
+      - name: puuid
+        tests: [not_null]
+      - name: champion_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_champions')
+              field: champion_id
+      - name: kill_participation
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+              where: "kill_participation is not null"
+      - name: damage_share
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+              where: "damage_share is not null"
+      - name: match_result
+        tests:
+          - accepted_values:
+              values: ['win', 'loss']
+
+  - name: fct_player_rolling_trends
+    description: >
+      Rolling averages and expanding percentiles of a player's own metrics over
+      their match history. Powers the trend lines.
+    columns:
+      - name: participant_key
+        tests: [not_null, unique]
+      - name: match_sequence_number
+        tests: [not_null]
+      - name: win_rate_rolling
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+
+  - name: fct_player_match_deltas
+    description: >
+      Each match's metrics relative to the player's own prior baseline, as a
+      z-score and percentile rank. One row per participant per metric.
+      Descriptive statistics, not an evaluation of the player.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [participant_key, metric_name]
+    columns:
+      - name: participant_key
+        tests: [not_null]
+      - name: metric_name
+        tests: [not_null]
+      - name: baseline_percentile_rank
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+              where: "baseline_percentile_rank is not null"
+      - name: has_sufficient_baseline
+        tests: [not_null]
+
+  - name: fct_champion_meta
+    description: Win rate, pick rate, and ban rate by champion by patch and queue.
+    columns:
+      - name: champion_meta_key
+        tests: [not_null, unique]
+      - name: pick_rate
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+      - name: ban_rate
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+      - name: win_rate
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+              where: "win_rate is not null"

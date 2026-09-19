@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: riot_raw
+    description: >
+      Raw JSON landed by the extraction layer and loaded into DuckDB verbatim.
+      Nothing here is cleaned; staging models own casting and renaming.
+    schema: main
+    tables:
+      - name: raw_matches
+        description: One row per match, from Match-V5 `/lol/match/v5/matches/{matchId}` metadata and info.
+        columns:
+          - name: match_id
+            tests: [not_null, unique]
+      - name: raw_match_participants
+        description: One row per participant per match, from the Match-V5 `info.participants` array.
+        columns:
+          - name: match_id
+            tests: [not_null]
+          - name: puuid
+            tests: [not_null]
+      - name: raw_match_teams
+        description: One row per team per match, from the Match-V5 `info.teams` array (objectives).
+      - name: raw_match_bans
+        description: One row per ban, unpacked from `info.teams[].bans`.
+      - name: raw_summoners
+        description: Account-V1 and Summoner-V4 responses for the tracked accounts.
+      - name: raw_champion_mastery
+        description: Champion-Mastery-V4 responses, one row per player per champion.

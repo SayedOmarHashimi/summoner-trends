@@ -1,0 +1,16 @@
+# Local dbt profile. dbt looks in ~/.dbt/profiles.yml by default, so run with
+#   dbt build --profiles-dir .
+# or copy this file to ~/.dbt/profiles.yml.
+summoner_trends:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH', 'summoner_trends.duckdb') }}"
+      threads: 4
+      extensions:
+        - httpfs
+    ci:
+      type: duckdb
+      path: "ci.duckdb"
+      threads: 4

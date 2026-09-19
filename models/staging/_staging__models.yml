@@ -1,0 +1,102 @@
+version: 2
+
+models:
+  - name: stg_matches
+    description: One row per match, cast and renamed from Match-V5 metadata/info.
+    columns:
+      - name: match_id
+        description: Riot match identifier, e.g. NA1_5012345678.
+        tests: [not_null, unique]
+      - name: queue_id
+        description: Riot queue id. 420 = ranked solo/duo, 440 = ranked flex.
+        tests: [not_null]
+      - name: patch
+        description: Major.minor patch parsed from game_version, e.g. "14.18".
+        tests: [not_null]
+      - name: game_duration_seconds
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+  - name: stg_match_participants
+    description: One row per participant per match.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [match_id, puuid]
+    columns:
+      - name: participant_key
+        tests: [not_null, unique]
+      - name: match_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_matches')
+              field: match_id
+      - name: puuid
+        tests: [not_null]
+      - name: champion_id
+        tests: [not_null]
+      - name: team_id
+        description: 100 = blue side, 200 = red side.
+        tests:
+          - accepted_values:
+              values: [100, 200]
+              quote: false
+      - name: kills
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+      - name: deaths
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+      - name: assists
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+      - name: is_win
+        tests: [not_null]
+
+  - name: stg_match_teams
+    description: One row per team per match, with objective counts.
+    columns:
+      - name: team_key
+        tests: [not_null, unique]
+      - name: match_id
+        tests:
+          - relationships:
+              to: ref('stg_matches')
+              field: match_id
+
+  - name: stg_team_bans
+    description: One row per champion banned, per team, per match.
+    columns:
+      - name: champion_id
+        tests: [not_null]
+
+  - name: stg_summoners
+    description: One row per tracked account, from Account-V1 plus Summoner-V4.
+    columns:
+      - name: puuid
+        tests: [not_null, unique]
+      - name: riot_id
+        tests: [not_null]
+
+  - name: stg_champion_mastery
+    description: One row per player per champion, from Champion-Mastery-V4.
+    columns:
+      - name: mastery_key
+        tests: [not_null, unique]
+
+  - name: stg_champions
+    description: Static champion reference data from Data Dragon.
+    columns:
+      - name: champion_id
+        tests: [not_null, unique]
+      - name: champion_name
+        tests: [not_null]
