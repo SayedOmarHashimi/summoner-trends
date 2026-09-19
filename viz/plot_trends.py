@@ -11,10 +11,16 @@ Each metric gets its own panel and its own y-axis. CS/min sits around 6 and
 gold/min around 400, so plotting them together would need two y-scales — which
 makes the lines' relative positions meaningless. Separate panels instead.
 
-The page carries a range filter (last 10 / 20 / 50 / all matches). That narrows
-which matches are *shown*; it does not recompute the rolling average, which
-stays the window dbt built. A point's rolling value always means the same thing
-whatever range is on screen.
+The page carries two filters. The range (last 10 / 20 / 50 / all) narrows which
+matches are shown; it never recomputes the rolling average, so a point means the
+same thing whatever range is on screen.
+
+The champion selector swaps in a different dbt model rather than filtering the
+current one. `fct_player_rolling_trends` averages across a player's whole
+history in order, so filtering it to one champion would show that champion's
+games beside a window that includes everything played in between.
+`fct_player_champion_trends` partitions the window by champion, so each average
+describes only games on it.
 
 The output is descriptive: it shows how a metric moved over time. It does not
 score, rank, or grade the player.
@@ -48,9 +54,44 @@ PAD_L, PAD_R, PAD_T, PAD_B = 48, 58, 14, 28
 
 RANGE_OPTIONS = [10, 20, 50, 100]
 
+# Below this, a champion's rolling average is built from too few games to
+# describe anything, so it is left out of the selector.
+MIN_CHAMPION_GAMES = 5
+
+
+def _trend_rows(
+    con: duckdb.DuckDBPyConnection,
+    table: str,
+    sequence_column: str,
+    puuid: str,
+    metrics: list[str],
+    extra: list[str] | None = None,
+) -> list[dict]:
+    selected = []
+    for metric in metrics:
+        selected.append(f"t.{metric}")
+        selected.append(f"t.{metric}_rolling_avg")
+
+    query = f"""
+        select
+            t.{sequence_column} as seq,
+            t.match_sequence_number,
+            t.champion_name,
+            cast(t.game_start_at as date) as game_date,
+            t.is_win,
+            t.rolling_window_matches,
+            {", ".join([*(extra or []), *selected])}
+        from {table} t
+        where t.puuid = ?
+        order by t.champion_name, t.{sequence_column}
+    """
+    cursor = con.execute(query, [puuid])
+    names = [d[0] for d in cursor.description]
+    return [dict(zip(names, r)) for r in cursor.fetchall()]
+
 
 def fetch(con: duckdb.DuckDBPyConnection, puuid: str | None, metrics: list[str]):
-    """Return (riot_id, rows) for one player's rolling trend history."""
+    """Return (riot_id, overall_rows, champion_rows) for one player."""
     if puuid is None:
         row = con.execute(
             "select puuid from marts.dim_players order by matches_extracted desc limit 1"
@@ -66,29 +107,38 @@ def fetch(con: duckdb.DuckDBPyConnection, puuid: str | None, metrics: list[str])
     ).fetchone()
     riot_id = label_row[0] if label_row else puuid[:12]
 
-    selected = []
-    for metric in metrics:
-        selected.append(f"t.{metric}")
-        selected.append(f"t.{metric}_rolling_avg")
-
-    query = f"""
-        select
-            t.match_sequence_number,
-            t.champion_name,
-            cast(t.game_start_at as date) as game_date,
-            t.is_win,
-            t.rolling_window_matches,
-            {", ".join(selected)}
-        from marts.fct_player_rolling_trends t
-        where t.puuid = ?
-        order by t.match_sequence_number
-    """
-    cursor = con.execute(query, [puuid])
-    names = [d[0] for d in cursor.description]
-    rows = [dict(zip(names, r)) for r in cursor.fetchall()]
-    if not rows:
+    overall = _trend_rows(
+        con, "marts.fct_player_rolling_trends", "match_sequence_number", puuid, metrics
+    )
+    if not overall:
         raise SystemExit(f"No rolling trend rows for puuid {puuid}.")
-    return riot_id, rows
+    overall.sort(key=lambda r: r["match_sequence_number"])
+
+    champion = _trend_rows(
+        con,
+        "marts.fct_player_champion_trends",
+        "champion_match_sequence_number",
+        puuid,
+        metrics,
+        extra=["t.player_champion_match_count"],
+    )
+    return riot_id, overall, champion
+
+
+def embed_json(payload: dict) -> str:
+    """Serialise for embedding inside a <script> block.
+
+    json.dumps leaves `<` alone, so a value containing `</script>` would close
+    the script element early. Champion names come from the Riot API rather than
+    from a user, but escaping the three characters that can break out costs
+    nothing and keeps the output valid JSON.
+    """
+    return (
+        json.dumps(payload)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+    )
 
 
 def fmt(value: float | None, kind: str) -> str:
@@ -106,33 +156,62 @@ def range_choices(total: int) -> list[int]:
     return [n for n in RANGE_OPTIONS if n < total]
 
 
-def build_payload(rows: list[dict], metrics: list[tuple[str, str, str]]) -> dict:
+def _dataset(rows: list[dict], label: str, metrics: list[tuple[str, str, str]]) -> dict:
+    """One switchable view: its series, and per-match metadata for the tooltip."""
     series = []
-    for key, label, kind in metrics:
+    for key, label_text, kind in metrics:
         points = [
-            {
-                "x": r["match_sequence_number"],
-                "raw": r[key],
-                "roll": r[f"{key}_rolling_avg"],
-            }
+            {"x": r["seq"], "raw": r[key], "roll": r[f"{key}_rolling_avg"]}
             for r in rows
             if r[key] is not None
         ]
         if len(points) >= 2:
-            series.append({"key": key, "label": label, "kind": kind, "points": points})
+            series.append(
+                {"key": key, "label": label_text, "kind": kind, "points": points}
+            )
 
     meta = [
         {
-            "x": r["match_sequence_number"],
+            "x": r["seq"],
+            "seq": r["match_sequence_number"],
             "date": str(r["game_date"]),
             "champion": r["champion_name"] or "—",
             "result": "Win" if r["is_win"] else "Loss",
         }
         for r in rows
     ]
+    return {"label": label, "total": len(rows), "series": series, "meta": meta}
+
+
+def build_payload(
+    overall_rows: list[dict],
+    champion_rows: list[dict],
+    metrics: list[tuple[str, str, str]],
+) -> dict:
+    """The overall view plus one dataset per champion with enough games.
+
+    Champion datasets come from a different model, not a filter of the overall
+    one — their rolling averages are partitioned by champion in SQL.
+    """
+    datasets = {"all": _dataset(overall_rows, "All champions", metrics)}
+
+    by_champion: dict[str, list[dict]] = {}
+    for row in champion_rows:
+        by_champion.setdefault(row["champion_name"] or "—", []).append(row)
+
+    options = []
+    for name, rows in by_champion.items():
+        if len(rows) < MIN_CHAMPION_GAMES:
+            continue
+        rows.sort(key=lambda r: r["seq"])
+        datasets[name] = _dataset(rows, name, metrics)
+        options.append({"key": name, "label": name, "games": len(rows)})
+
+    options.sort(key=lambda o: (-o["games"], o["label"]))
     return {
-        "series": series,
-        "meta": meta,
+        "datasets": datasets,
+        "champions": options,
+        "minChampionGames": MIN_CHAMPION_GAMES,
         "view": {"w": VIEW_W, "h": VIEW_H, "l": PAD_L, "r": PAD_R, "t": PAD_T, "b": PAD_B},
     }
 
@@ -145,7 +224,8 @@ def build_table(rows: list[dict], metrics: list[tuple[str, str, str]]) -> str:
             f"<td>{html.escape(fmt(r[m], kind))}</td>" for m, _, kind in metrics
         )
         body.append(
-            f"<tr data-seq=\"{r['match_sequence_number']}\">"
+            f"<tr data-seq=\"{r['match_sequence_number']}\" "
+            f"data-champion=\"{html.escape(r['champion_name'] or '—', quote=True)}\">"
             f"<td>{r['match_sequence_number']}</td>"
             f"<td>{html.escape(str(r['game_date']))}</td>"
             f"<td>{html.escape(r['champion_name'] or '—')}</td>"
@@ -220,6 +300,12 @@ CSS = """
     margin: 0 0 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
   }
   .controls .label { color: var(--text-secondary); font-size: 13px; }
+  .controls select {
+    font: inherit; font-size: 13px; padding: 5px 10px; min-height: 32px;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface-1); color: var(--text-primary); cursor: pointer;
+  }
+  .controls select:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
   .chips { display: flex; gap: 6px; flex-wrap: wrap; }
   .chip {
     font: inherit; font-size: 13px; cursor: pointer;
@@ -243,6 +329,7 @@ CSS = """
     margin: 0; padding: 14px 12px 6px; position: relative;
     background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
   }
+  .panel[hidden] { display: none; }
   figcaption { font-size: 13px; font-weight: 600; margin: 0 0 6px 4px; }
   svg { width: 100%; height: auto; display: block; overflow: visible; }
   .grid { stroke: var(--grid); stroke-width: 1; }
@@ -284,7 +371,9 @@ JS = r"""
 const DATA = __PAYLOAD__;
 const V = DATA.view;
 const SVG_NS = "http://www.w3.org/2000/svg";
-const metaByX = new Map(DATA.meta.map(m => [m.x, m]));
+// Rebuilt whenever the dataset changes: x means "match number" in the overall
+// view and "games on this champion" in a champion view, so the lookup differs.
+let metaByX = new Map();
 
 const fmt = (v, kind) => v === null || v === undefined ? "—"
   : kind === "pct" ? (v * 100).toFixed(0) + "%"
@@ -392,10 +481,19 @@ function attachHover(panel) {
       dotRoll.setAttribute("cx", px); dotRoll.setAttribute("cy", pyRoll);
     }
 
+    // In a champion view x counts games on that champion, not overall matches,
+    // so the heading has to say which number it is showing.
     const meta = metaByX.get(best.x);
+    const head = state.dataset === "all"
+      ? `Match ${best.x}${meta ? " · " + esc(meta.champion) : ""}`
+      : `Game ${best.x} on ${esc(state.dataset)}`;
+    const sub = meta
+      ? `${esc(meta.date)} · ${esc(meta.result)}` +
+        (state.dataset === "all" ? "" : ` · match #${meta.seq}`)
+      : "";
     tip.innerHTML =
-      `<div class="head">Match ${best.x}${meta ? " · " + esc(meta.champion) : ""}</div>` +
-      (meta ? `<div class="row">${esc(meta.date)} · ${esc(meta.result)}</div>` : "") +
+      `<div class="head">${head}</div>` +
+      (sub ? `<div class="row">${sub}</div>` : "") +
       `<div class="row">Game: <b>${fmt(best.raw, plot.spec.kind)}</b></div>` +
       `<div class="row">Rolling: <b>${fmt(best.roll, plot.spec.kind)}</b></div>`;
 
@@ -419,67 +517,103 @@ function attachHover(panel) {
 const panels = [...document.querySelectorAll(".panel")];
 panels.forEach(attachHover);
 
-function applyRange(range) {
-  panels.forEach(panel => {
-    const spec = DATA.series.find(s => s.key === panel.dataset.metric);
-    if (spec) drawPanel(panel, spec, range);
-  });
+const state = { dataset: "all", range: "all" };
+const chipRow = document.getElementById("range-chips");
+const picker = document.getElementById("champion-picker");
 
-  // The table follows the same range, so the two views never disagree.
-  const total = DATA.meta.length;
-  const cutoff = range === "all" ? -Infinity : DATA.meta[Math.max(0, total - range)].x;
-  document.querySelectorAll("tbody tr").forEach(tr => {
-    tr.hidden = Number(tr.dataset.seq) < cutoff;
-  });
+const active = () => DATA.datasets[state.dataset];
 
-  const shown = range === "all" ? total : Math.min(range, total);
-  document.getElementById("range-note").textContent =
-    shown === total ? `all ${total} matches` : `last ${shown} of ${total} matches`;
+// Only offer ranges this dataset can actually fill: a champion with 12 games
+// gets "Last 10" and "All", not a "Last 50" that silently means the same thing.
+function renderChips() {
+  const total = active().total;
+  const options = [10, 20, 50, 100].filter(n => n < total);
+  chipRow.innerHTML = options
+    .map(n => `<button class="chip" type="button" data-range="${n}">Last ${n}</button>`)
+    .join("") + `<button class="chip" type="button" data-range="all">All</button>`;
 
-  // The dates have to follow the range too, or the header describes a
-  // different set of matches than the charts do.
-  const visible = DATA.meta.slice(total - shown);
-  document.getElementById("date-note").textContent =
-    visible.length ? `${visible[0].date} to ${visible[visible.length - 1].date}` : "";
-
-  document.querySelectorAll(".chip").forEach(chip => {
-    chip.setAttribute("aria-pressed", String(chip.dataset.range === String(range)));
+  if (state.range !== "all" && !options.includes(state.range)) state.range = "all";
+  chipRow.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const value = chip.dataset.range;
+      state.range = value === "all" ? "all" : Number(value);
+      applyFilters();
+    });
   });
 }
 
-document.querySelectorAll(".chip").forEach(chip => {
-  chip.addEventListener("click", () => {
-    const value = chip.dataset.range;
-    applyRange(value === "all" ? "all" : Number(value));
+function applyFilters() {
+  const data = active();
+  const total = data.total;
+  const shown = state.range === "all" ? total : Math.min(state.range, total);
+
+  const visible = data.meta.slice(total - shown);
+  const shownSeqs = new Set(visible.map(m => m.seq));
+  metaByX = new Map(data.meta.map(m => [m.x, m]));
+
+  panels.forEach(panel => {
+    const spec = data.series.find(s => s.key === panel.dataset.metric);
+    panel.hidden = !spec;
+    if (spec) drawPanel(panel, spec, state.range);
   });
+
+  // The table follows both filters, so the two views never disagree.
+  document.querySelectorAll("tbody tr").forEach(tr => {
+    tr.hidden = !shownSeqs.has(Number(tr.dataset.seq));
+  });
+
+  const suffix = state.dataset === "all" ? "" : ` on ${state.dataset}`;
+  document.getElementById("range-note").textContent =
+    (shown === total ? `all ${total} matches` : `last ${shown} of ${total} matches`) + suffix;
+  document.getElementById("date-note").textContent =
+    visible.length ? `${visible[0].date} to ${visible[visible.length - 1].date}` : "";
+
+  const empty = document.getElementById("empty-note");
+  empty.hidden = data.series.length > 0;
+
+  chipRow.querySelectorAll(".chip").forEach(chip => {
+    chip.setAttribute("aria-pressed", String(chip.dataset.range === String(state.range)));
+  });
+}
+
+picker.addEventListener("change", () => {
+  state.dataset = picker.value;
+  renderChips();
+  applyFilters();
 });
 
-applyRange("all");
+renderChips();
+applyFilters();
 """
 
 
-def render(riot_id: str, rows: list[dict], metrics: list[tuple[str, str, str]]) -> str:
-    window = rows[0].get("rolling_window_matches") or 10
-    total = len(rows)
-    payload = build_payload(rows, metrics)
+def render(
+    riot_id: str,
+    overall_rows: list[dict],
+    champion_rows: list[dict],
+    metrics: list[tuple[str, str, str]],
+) -> str:
+    window = overall_rows[0].get("rolling_window_matches") or 10
+    total = len(overall_rows)
+    payload = build_payload(overall_rows, champion_rows, metrics)
 
     panels = "".join(
-        f'<figure class="panel" data-metric="{html.escape(s["key"])}">'
-        f'<figcaption>{html.escape(s["label"])}</figcaption>'
+        f'<figure class="panel" data-metric="{html.escape(key)}">'
+        f"<figcaption>{html.escape(label)}</figcaption>"
         f'<svg viewBox="0 0 {VIEW_W} {VIEW_H}" role="img" '
-        f'aria-label="{html.escape(s["label"])} across matches"></svg>'
+        f'aria-label="{html.escape(label)} across matches"></svg>'
         f"</figure>"
-        for s in payload["series"]
+        for key, label, _ in metrics
     )
 
-    chips = "".join(
-        f'<button class="chip" type="button" data-range="{n}" aria-pressed="false">Last {n}</button>'
-        for n in range_choices(total)
+    options = '<option value="all">All champions</option>' + "".join(
+        f'<option value="{html.escape(c["key"], quote=True)}">'
+        f'{html.escape(c["label"])} ({c["games"]} games)</option>'
+        for c in payload["champions"]
     )
-    chips += '<button class="chip" type="button" data-range="all" aria-pressed="true">All</button>'
 
-    first, last = rows[0]["game_date"], rows[-1]["game_date"]
-    js = JS.replace("__PAYLOAD__", json.dumps(payload))
+    first, last = overall_rows[0]["game_date"], overall_rows[-1]["game_date"]
+    js = JS.replace("__PAYLOAD__", embed_json(payload))
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -497,20 +631,26 @@ def render(riot_id: str, rows: list[dict], metrics: list[tuple[str, str, str]]) 
     Each panel shows one metric across matches in chronological order. The faint
     line is the per-game value; the solid line is the {window}-match rolling
     average. Panels have separate y-axes because the metrics are on different
-    scales. Changing the range zooms in on recent matches — it does not change
-    how the rolling average is calculated, so a point means the same thing at
-    every range. These are descriptive trends, not a score or rating.
+    scales. Picking a champion switches to a rolling average computed from that
+    champion's games only. Changing the range zooms in on recent matches — it
+    does not change how the average is calculated, so a point means the same
+    thing at every range. These are descriptive trends, not a score or rating.
   </p>
   <div class="controls">
+    <label class="label" for="champion-picker">Champion</label>
+    <select id="champion-picker">{options}</select>
     <span class="label">Range</span>
-    <div class="chips" role="group" aria-label="Number of recent matches to show">{chips}</div>
+    <div class="chips" id="range-chips" role="group" aria-label="Number of recent matches to show"></div>
   </div>
   <div class="legend">
     <span><i class="swatch raw"></i> Per-game value</span>
     <span><i class="swatch roll"></i> {window}-match rolling average</span>
   </div>
+  <p id="empty-note" class="note" hidden>
+    Not enough games on this champion to plot a trend.
+  </p>
   <div class="grid-panels">{panels}</div>
-  {build_table(rows, metrics)}
+  {build_table(overall_rows, metrics)}
 </div>
 <script>{js}</script>
 </body>
@@ -541,12 +681,19 @@ def main(argv: list[str] | None = None) -> int:
 
     con = duckdb.connect(str(args.duckdb), read_only=True)
     try:
-        riot_id, rows = fetch(con, args.puuid, [m[0] for m in chosen])
+        riot_id, overall_rows, champion_rows = fetch(
+            con, args.puuid, [m[0] for m in chosen]
+        )
     finally:
         con.close()
 
-    args.output.write_text(render(riot_id, rows, chosen), encoding="utf-8")
-    print(f"Wrote {args.output} — {len(rows)} matches, {len(chosen)} panels.")
+    page = render(riot_id, overall_rows, champion_rows, chosen)
+    args.output.write_text(page, encoding="utf-8")
+    champions = len(build_payload(overall_rows, champion_rows, chosen)["champions"])
+    print(
+        f"Wrote {args.output} — {len(overall_rows)} matches, {len(chosen)} panels, "
+        f"{champions} champions with {MIN_CHAMPION_GAMES}+ games."
+    )
     print(f"Open it with:  open {args.output}")
     return 0
 

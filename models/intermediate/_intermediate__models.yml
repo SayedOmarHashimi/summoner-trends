@@ -34,6 +34,12 @@ models:
         tests: [not_null, unique]
       - name: match_sequence_number
         tests: [not_null]
+      - name: champion_match_sequence_number
+        description: Position of this match within the player's games on that champion.
+        tests: [not_null]
+      - name: player_champion_match_count
+        description: How many games the player has on that champion.
+        tests: [not_null]
 
   - name: int_champion_match_appearances
     description: One row per champion per match per team, flagged as picked or banned.

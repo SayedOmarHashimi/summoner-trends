@@ -87,6 +87,8 @@ summoner-trends/
   duration, result.
 - `fct_player_rolling_trends` — rolling averages and percentiles of those
   metrics across a player's match history. Powers the trend lines.
+- `fct_player_champion_trends` — the same rolling metrics, partitioned by
+  champion, so each average covers only games on that champion.
 - `fct_player_match_deltas` — each match's stats relative to that player's own
   historical baseline (z-score and percentile rank). Descriptive statistical
   analysis, not an evaluation.
@@ -151,7 +153,18 @@ open trends.html
 Reads `fct_player_rolling_trends` and writes a standalone HTML page: one panel
 per metric, with the per-game value as context behind the rolling average.
 
-A range filter across the top switches between the last 10, 20, 50, and all
+A champion selector and a range filter sit across the top.
+
+The champion selector switches between `fct_player_rolling_trends` (all
+champions) and `fct_player_champion_trends` (one champion). It swaps models
+rather than filtering one, because the overall model's rolling average spans a
+player's whole history in order — filtering it to one champion would show that
+champion's games beside a window that includes everything played in between.
+The per-champion model partitions the window by champion, so each average
+describes only games on it. Champions with fewer than five games are left out:
+too few games for a rolling average to describe anything.
+
+The range filter switches between the last 10, 20, 50, and all
 matches. That changes which matches are *shown* — the axes rescale and the
 table follows — but not how the rolling average is calculated, so a point means
 the same thing at every range. The rolling window itself is set by the

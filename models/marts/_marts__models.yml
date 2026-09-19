@@ -90,6 +90,32 @@ models:
               max_value: 1
               inclusive: true
 
+  - name: fct_player_champion_trends
+    description: >
+      Rolling trends partitioned by champion, so every average describes only
+      games on that champion. Filtering fct_player_rolling_trends cannot produce
+      this: its window spans the player's whole history in order.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [puuid, champion_id, champion_match_sequence_number]
+    columns:
+      - name: participant_key
+        tests: [not_null, unique]
+      - name: champion_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_champions')
+              field: champion_id
+      - name: champion_match_sequence_number
+        tests: [not_null]
+      - name: win_rate_rolling
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+
   - name: fct_player_match_deltas
     description: >
       Each match's metrics relative to the player's own prior baseline, as a

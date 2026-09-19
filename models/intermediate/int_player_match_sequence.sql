@@ -33,7 +33,18 @@ sequenced as (
             partition by puuid
             order by game_start_at, match_id
         ) as match_sequence_number,
-        count(*) over (partition by puuid) as player_match_count
+        count(*) over (partition by puuid) as player_match_count,
+
+        -- A second sequence per champion. A champion's rolling average has to
+        -- be built from that champion's games only — mixing in other champions
+        -- would describe a window the player never actually played.
+        row_number() over (
+            partition by puuid, champion_id
+            order by game_start_at, match_id
+        ) as champion_match_sequence_number,
+        count(*) over (
+            partition by puuid, champion_id
+        ) as player_champion_match_count
     from filtered
 
 )
