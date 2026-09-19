@@ -24,6 +24,9 @@ logs/
 *.duckdb.wal
 *.db
 
+# Generated charts (contain match data)
+trends.html
+
 # Raw / intermediate extraction output
 data/
 raw/

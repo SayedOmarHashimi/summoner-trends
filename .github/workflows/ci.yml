@@ -54,6 +54,16 @@ jobs:
       - name: Run unit tests
         run: pytest
 
+      - name: Check the chart generator renders
+        # Builds a fixture warehouse and renders the page, so a broken chart
+        # generator fails CI rather than failing the first time it is run.
+        run: |
+          python ci/generate_fixtures.py --output data/ci --duckdb ci.duckdb
+          dbt deps --profiles-dir .
+          DUCKDB_PATH=ci.duckdb dbt build --profiles-dir . --target ci --quiet
+          python -m viz.plot_trends --duckdb ci.duckdb --output /tmp/trends.html
+          test -s /tmp/trends.html
+
   dbt:
     name: dbt build
     runs-on: ubuntu-latest

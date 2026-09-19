@@ -67,6 +67,7 @@ summoner-trends/
 ├── macros/              Reusable dbt macros
 ├── tests/               Custom singular dbt tests
 ├── seeds/               Small static reference CSVs
+├── viz/                 Renders the trend charts as a standalone HTML page
 ├── ci/                  Fixture generator so CI can build without the API
 └── .github/workflows/   CI
 ```
@@ -139,6 +140,23 @@ python -m extraction.pull_matches --help
 pytest                      # unit tests for the extraction layer
 dbt build --profiles-dir .  # models, seeds, snapshots, and dbt tests
 ```
+
+### Charting the trends
+
+```bash
+python -m viz.plot_trends
+open trends.html
+```
+
+Reads `fct_player_rolling_trends` and writes a standalone HTML page: one panel
+per metric, with the per-game value as context behind the rolling average.
+
+Each metric gets its own panel and y-axis rather than sharing one chart. CS/min
+sits around 6 and gold/min around 400, so a shared axis would flatten one of
+them into a straight line; a second y-axis would make the lines' relative
+positions meaningless. The page has no external dependencies — the SVG is
+generated inline, so it works offline — and carries a table view for the same
+data.
 
 ### CI
 
