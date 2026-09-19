@@ -8,8 +8,6 @@ summoner_trends:
       type: duckdb
       path: "{{ env_var('DUCKDB_PATH', 'summoner_trends.duckdb') }}"
       threads: 4
-      extensions:
-        - httpfs
     ci:
       type: duckdb
       path: "ci.duckdb"

@@ -151,6 +151,13 @@ open trends.html
 Reads `fct_player_rolling_trends` and writes a standalone HTML page: one panel
 per metric, with the per-game value as context behind the rolling average.
 
+A range filter across the top switches between the last 10, 20, 50, and all
+matches. That changes which matches are *shown* — the axes rescale and the
+table follows — but not how the rolling average is calculated, so a point means
+the same thing at every range. The rolling window itself is set by the
+`rolling_window_matches` var in `dbt_project.yml`, because it is computed in
+SQL rather than in the browser.
+
 Each metric gets its own panel and y-axis rather than sharing one chart. CS/min
 sits around 6 and gold/min around 400, so a shared axis would flatten one of
 them into a straight line; a second y-axis would make the lines' relative
