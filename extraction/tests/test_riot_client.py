@@ -160,9 +160,9 @@ def test_client_errors_are_not_retried(settings, no_sleep):
     assert no_sleep.slept == []
 
 
-def test_403_explains_that_personal_keys_expire(settings, no_sleep):
+def test_403_points_at_the_api_key(settings, no_sleep):
     client, _ = build_client(settings, [FakeResponse(403)])
-    with pytest.raises(RiotAPIError, match="24 hours"):
+    with pytest.raises(RiotAPIError, match="RIOT_API_KEY"):
         client.get_match("NA1_1")
 
 

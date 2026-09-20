@@ -49,8 +49,8 @@ def load_settings(env_file: Path | None = None) -> Settings:
     api_key = os.getenv("RIOT_API_KEY", "").strip()
     if not api_key:
         raise ConfigError(
-            "RIOT_API_KEY is not set. Copy .env.example to .env and add your key. "
-            "Personal keys expire every 24 hours."
+            "RIOT_API_KEY is not set. Copy .env.example to .env and add your key "
+            "from https://developer.riotgames.com/."
         )
     if api_key.startswith("RGAPI-00000000"):
         raise ConfigError(

@@ -139,8 +139,9 @@ class RiotClient:
                 raise RiotAPIError(
                     response.status_code,
                     url,
-                    "unauthorized — a Personal API key expires every 24 hours, "
-                    "so this usually means RIOT_API_KEY needs regenerating",
+                    "unauthorized — check RIOT_API_KEY. A Development key expires "
+                    "24 hours after it is issued; a Personal or Production key does "
+                    "not, but can be revoked or regenerated on the developer portal",
                 )
 
             raise RiotAPIError(response.status_code, url, response.reason or "request failed")
