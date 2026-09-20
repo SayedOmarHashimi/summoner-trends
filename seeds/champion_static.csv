@@ -1,21 +1,174 @@
 champion_id,champion_key,champion_name,champion_title,primary_role,secondary_role,resource_type,data_dragon_version
-1,Annie,Annie,the Dark Child,Mage,,Mana,14.18.1
-2,Olaf,Olaf,the Berserker,Fighter,Tank,Mana,14.18.1
-3,Galio,Galio,the Colossus,Tank,Mage,Mana,14.18.1
-4,TwistedFate,Twisted Fate,the Card Master,Mage,,Mana,14.18.1
-5,XinZhao,Xin Zhao,the Seneschal of Demacia,Fighter,Assassin,Mana,14.18.1
-11,MasterYi,Master Yi,the Wuju Bladesman,Assassin,Fighter,Mana,14.18.1
-17,Teemo,Teemo,the Swift Scout,Marksman,Assassin,Mana,14.18.1
-18,Tristana,Tristana,the Yordle Gunner,Marksman,Assassin,Mana,14.18.1
-22,Ashe,Ashe,the Frost Archer,Marksman,Support,Mana,14.18.1
-51,Caitlyn,Caitlyn,the Sheriff of Piltover,Marksman,,Mana,14.18.1
-64,LeeSin,Lee Sin,the Blind Monk,Fighter,Assassin,Energy,14.18.1
-84,Akali,Akali,the Rogue Assassin,Assassin,,Energy,14.18.1
-86,Garen,Garen,the Might of Demacia,Fighter,Tank,None,14.18.1
-103,Ahri,Ahri,the Nine-Tailed Fox,Mage,Assassin,Mana,14.18.1
-157,Yasuo,Yasuo,the Unforgiven,Fighter,Assassin,Flow,14.18.1
-222,Jinx,Jinx,the Loose Cannon,Marksman,,Mana,14.18.1
-238,Zed,Zed,the Master of Shadows,Assassin,Fighter,Energy,14.18.1
-412,Thresh,Thresh,the Chain Warden,Support,Fighter,Mana,14.18.1
-777,Yone,Yone,the Unforgotten,Assassin,Fighter,None,14.18.1
-875,Sett,Sett,the Boss,Fighter,Tank,Grit,14.18.1
+1,Annie,Annie,the Dark Child,Mage,Support,Mana,16.18.1
+2,Olaf,Olaf,the Berserker,Fighter,Tank,Mana,16.18.1
+3,Galio,Galio,the Colossus,Tank,Mage,Mana,16.18.1
+4,TwistedFate,Twisted Fate,the Card Master,Mage,Marksman,Mana,16.18.1
+5,XinZhao,Xin Zhao,the Seneschal of Demacia,Fighter,Tank,Mana,16.18.1
+6,Urgot,Urgot,the Dreadnought,Fighter,Tank,Mana,16.18.1
+7,Leblanc,LeBlanc,the Deceiver,Assassin,Mage,Mana,16.18.1
+8,Vladimir,Vladimir,the Crimson Reaper,Mage,Fighter,Crimson Rush,16.18.1
+9,Fiddlesticks,Fiddlesticks,the Ancient Fear,Mage,Support,Mana,16.18.1
+10,Kayle,Kayle,the Righteous,Marksman,Mage,Mana,16.18.1
+11,MasterYi,Master Yi,the Wuju Bladesman,Fighter,Assassin,Mana,16.18.1
+12,Alistar,Alistar,the Minotaur,Tank,Support,Mana,16.18.1
+13,Ryze,Ryze,the Rune Mage,Mage,,Mana,16.18.1
+14,Sion,Sion,The Undead Juggernaut,Tank,Fighter,Mana,16.18.1
+15,Sivir,Sivir,the Battle Mistress,Marksman,,Mana,16.18.1
+16,Soraka,Soraka,the Starchild,Support,Mage,Mana,16.18.1
+17,Teemo,Teemo,the Swift Scout,Marksman,Mage,Mana,16.18.1
+18,Tristana,Tristana,the Yordle Gunner,Marksman,Assassin,Mana,16.18.1
+19,Warwick,Warwick,the Uncaged Wrath of Zaun,Fighter,Tank,Mana,16.18.1
+20,Nunu,Nunu & Willump,the Boy and His Yeti,Tank,Mage,Mana,16.18.1
+21,MissFortune,Miss Fortune,the Bounty Hunter,Marksman,Mage,Mana,16.18.1
+22,Ashe,Ashe,the Frost Archer,Marksman,Support,Mana,16.18.1
+23,Tryndamere,Tryndamere,the Barbarian King,Fighter,Assassin,Fury,16.18.1
+24,Jax,Jax,Grandmaster at Arms,Fighter,,Mana,16.18.1
+25,Morgana,Morgana,the Fallen,Support,Mage,Mana,16.18.1
+26,Zilean,Zilean,the Chronokeeper,Support,Mage,Mana,16.18.1
+27,Singed,Singed,the Mad Chemist,Tank,Mage,Mana,16.18.1
+28,Evelynn,Evelynn,Agony's Embrace,Assassin,Mage,Mana,16.18.1
+29,Twitch,Twitch,the Plague Rat,Marksman,Assassin,Mana,16.18.1
+30,Karthus,Karthus,the Deathsinger,Mage,,Mana,16.18.1
+31,Chogath,Cho'Gath,the Terror of the Void,Tank,Mage,Mana,16.18.1
+32,Amumu,Amumu,the Sad Mummy,Tank,Support,Mana,16.18.1
+33,Rammus,Rammus,the Armordillo,Tank,,Mana,16.18.1
+34,Anivia,Anivia,the Cryophoenix,Mage,,Mana,16.18.1
+35,Shaco,Shaco,the Demon Jester,Assassin,,Mana,16.18.1
+36,DrMundo,Dr. Mundo,the Madman of Zaun,Tank,Fighter,None,16.18.1
+37,Sona,Sona,Maven of the Strings,Support,Mage,Mana,16.18.1
+38,Kassadin,Kassadin,the Void Walker,Assassin,Mage,Mana,16.18.1
+39,Irelia,Irelia,the Blade Dancer,Fighter,Assassin,Mana,16.18.1
+40,Janna,Janna,the Storm's Fury,Support,Mage,Mana,16.18.1
+41,Gangplank,Gangplank,the Saltwater Scourge,Fighter,,Mana,16.18.1
+42,Corki,Corki,the Daring Bombardier,Marksman,Mage,Mana,16.18.1
+43,Karma,Karma,the Enlightened One,Mage,Support,Mana,16.18.1
+44,Taric,Taric,the Shield of Valoran,Support,Tank,Mana,16.18.1
+45,Veigar,Veigar,the Tiny Master of Evil,Mage,,Mana,16.18.1
+48,Trundle,Trundle,the Troll King,Fighter,Tank,Mana,16.18.1
+50,Swain,Swain,the Noxian Grand General,Mage,Support,Mana,16.18.1
+51,Caitlyn,Caitlyn,the Sheriff of Piltover,Marksman,,Mana,16.18.1
+53,Blitzcrank,Blitzcrank,the Great Steam Golem,Tank,Support,Mana,16.18.1
+54,Malphite,Malphite,Shard of the Monolith,Tank,Mage,Mana,16.18.1
+55,Katarina,Katarina,the Sinister Blade,Assassin,Mage,None,16.18.1
+56,Nocturne,Nocturne,the Eternal Nightmare,Fighter,Assassin,Mana,16.18.1
+57,Maokai,Maokai,the Twisted Treant,Tank,Support,Mana,16.18.1
+58,Renekton,Renekton,the Butcher of the Sands,Fighter,Tank,Fury,16.18.1
+59,JarvanIV,Jarvan IV,the Exemplar of Demacia,Fighter,Tank,Mana,16.18.1
+60,Elise,Elise,the Spider Queen,Assassin,Mage,Mana,16.18.1
+61,Orianna,Orianna,the Lady of Clockwork,Mage,Support,Mana,16.18.1
+62,MonkeyKing,Wukong,the Monkey King,Fighter,Tank,Mana,16.18.1
+63,Brand,Brand,the Burning Vengeance,Mage,Support,Mana,16.18.1
+64,LeeSin,Lee Sin,the Blind Monk,Fighter,Assassin,Energy,16.18.1
+67,Vayne,Vayne,the Night Hunter,Marksman,Assassin,Mana,16.18.1
+68,Rumble,Rumble,the Mechanized Menace,Fighter,Mage,Heat,16.18.1
+69,Cassiopeia,Cassiopeia,the Serpent's Embrace,Mage,,Mana,16.18.1
+72,Skarner,Skarner,the Primordial Sovereign,Tank,Fighter,Mana,16.18.1
+74,Heimerdinger,Heimerdinger,the Revered Inventor,Mage,Support,Mana,16.18.1
+75,Nasus,Nasus,the Curator of the Sands,Fighter,Tank,Mana,16.18.1
+76,Nidalee,Nidalee,the Bestial Huntress,Assassin,Mage,Mana,16.18.1
+77,Udyr,Udyr,the Spirit Walker,Fighter,Tank,Mana,16.18.1
+78,Poppy,Poppy,Keeper of the Hammer,Tank,Fighter,Mana,16.18.1
+79,Gragas,Gragas,the Rabble Rouser,Fighter,Mage,Mana,16.18.1
+80,Pantheon,Pantheon,the Unbreakable Spear,Fighter,Assassin,Mana,16.18.1
+81,Ezreal,Ezreal,the Prodigal Explorer,Marksman,Mage,Mana,16.18.1
+82,Mordekaiser,Mordekaiser,the Iron Revenant,Fighter,Mage,Shield,16.18.1
+83,Yorick,Yorick,Shepherd of Souls,Fighter,Tank,Mana,16.18.1
+84,Akali,Akali,the Rogue Assassin,Assassin,,Energy,16.18.1
+85,Kennen,Kennen,the Heart of the Tempest,Mage,,Energy,16.18.1
+86,Garen,Garen,The Might of Demacia,Fighter,Tank,None,16.18.1
+89,Leona,Leona,the Radiant Dawn,Tank,Support,Mana,16.18.1
+90,Malzahar,Malzahar,the Prophet of the Void,Mage,,Mana,16.18.1
+91,Talon,Talon,the Blade's Shadow,Assassin,,Mana,16.18.1
+92,Riven,Riven,the Exile,Fighter,Assassin,None,16.18.1
+96,KogMaw,Kog'Maw,the Mouth of the Abyss,Marksman,Mage,Mana,16.18.1
+98,Shen,Shen,the Eye of Twilight,Tank,,Energy,16.18.1
+99,Lux,Lux,the Lady of Luminosity,Mage,Support,Mana,16.18.1
+101,Xerath,Xerath,the Magus Ascendant,Mage,Support,Mana,16.18.1
+102,Shyvana,Shyvana,the Half-Dragon,Fighter,Tank,Fury,16.18.1
+103,Ahri,Ahri,the Nine-Tailed Fox,Mage,Assassin,Mana,16.18.1
+104,Graves,Graves,the Outlaw,Marksman,,Mana,16.18.1
+105,Fizz,Fizz,the Tidal Trickster,Assassin,Fighter,Mana,16.18.1
+106,Volibear,Volibear,the Relentless Storm,Fighter,Tank,Mana,16.18.1
+107,Rengar,Rengar,the Pridestalker,Assassin,Fighter,Ferocity,16.18.1
+110,Varus,Varus,the Arrow of Retribution,Marksman,Mage,Mana,16.18.1
+111,Nautilus,Nautilus,the Titan of the Depths,Tank,Support,Mana,16.18.1
+112,Viktor,Viktor,the Herald of the Arcane,Mage,,Mana,16.18.1
+113,Sejuani,Sejuani,Fury of the North,Tank,,Mana,16.18.1
+114,Fiora,Fiora,the Grand Duelist,Fighter,Assassin,Mana,16.18.1
+115,Ziggs,Ziggs,the Hexplosives Expert,Mage,,Mana,16.18.1
+117,Lulu,Lulu,the Fae Sorceress,Support,Mage,Mana,16.18.1
+119,Draven,Draven,the Glorious Executioner,Marksman,,Mana,16.18.1
+120,Hecarim,Hecarim,the Shadow of War,Fighter,Tank,Mana,16.18.1
+121,Khazix,Kha'Zix,the Voidreaver,Assassin,,Mana,16.18.1
+122,Darius,Darius,the Hand of Noxus,Fighter,Tank,Mana,16.18.1
+126,Jayce,Jayce,the Defender of Tomorrow,Fighter,Marksman,Mana,16.18.1
+127,Lissandra,Lissandra,the Ice Witch,Mage,,Mana,16.18.1
+131,Diana,Diana,Scorn of the Moon,Fighter,Assassin,Mana,16.18.1
+133,Quinn,Quinn,Demacia's Wings,Marksman,Assassin,Mana,16.18.1
+134,Syndra,Syndra,the Dark Sovereign,Mage,,Mana,16.18.1
+136,AurelionSol,Aurelion Sol,The Star Forger,Mage,,Mana,16.18.1
+141,Kayn,Kayn,the Shadow Reaper,Fighter,Assassin,Mana,16.18.1
+142,Zoe,Zoe,the Aspect of Twilight,Mage,,Mana,16.18.1
+143,Zyra,Zyra,Rise of the Thorns,Mage,Support,Mana,16.18.1
+145,Kaisa,Kai'Sa,Daughter of the Void,Marksman,Mage,Mana,16.18.1
+147,Seraphine,Seraphine,the Starry-Eyed Songstress,Support,Mage,Mana,16.18.1
+150,Gnar,Gnar,the Missing Link,Fighter,Tank,Rage,16.18.1
+154,Zac,Zac,the Secret Weapon,Tank,Fighter,None,16.18.1
+157,Yasuo,Yasuo,the Unforgiven,Fighter,Assassin,Flow,16.18.1
+161,Velkoz,Vel'Koz,the Eye of the Void,Mage,Support,Mana,16.18.1
+163,Taliyah,Taliyah,the Stoneweaver,Mage,Support,Mana,16.18.1
+164,Camille,Camille,the Steel Shadow,Fighter,Assassin,Mana,16.18.1
+166,Akshan,Akshan,the Rogue Sentinel,Marksman,Assassin,Mana,16.18.1
+200,Belveth,Bel'Veth,the Empress of the Void,Fighter,,,16.18.1
+201,Braum,Braum,the Heart of the Freljord,Tank,Support,Mana,16.18.1
+202,Jhin,Jhin,the Virtuoso,Marksman,Mage,Mana,16.18.1
+203,Kindred,Kindred,The Eternal Hunters,Marksman,,Mana,16.18.1
+221,Zeri,Zeri,The Spark of Zaun,Marksman,,Mana,16.18.1
+222,Jinx,Jinx,the Loose Cannon,Marksman,,Mana,16.18.1
+223,TahmKench,Tahm Kench,The River King,Tank,Support,Mana,16.18.1
+233,Briar,Briar,the Restrained Hunger,Fighter,Assassin,Fury,16.18.1
+234,Viego,Viego,The Ruined King,Fighter,Assassin,None,16.18.1
+235,Senna,Senna,the Redeemer,Support,Marksman,Mana,16.18.1
+236,Lucian,Lucian,the Purifier,Marksman,Assassin,Mana,16.18.1
+238,Zed,Zed,the Master of Shadows,Assassin,,Energy,16.18.1
+240,Kled,Kled,the Cantankerous Cavalier,Fighter,,Courage,16.18.1
+245,Ekko,Ekko,the Boy Who Shattered Time,Assassin,Mage,Mana,16.18.1
+246,Qiyana,Qiyana,Empress of the Elements,Assassin,,Mana,16.18.1
+254,Vi,Vi,the Piltover Enforcer,Fighter,Assassin,Mana,16.18.1
+266,Aatrox,Aatrox,the Darkin Blade,Fighter,,Blood Well,16.18.1
+267,Nami,Nami,the Tidecaller,Support,Mage,Mana,16.18.1
+268,Azir,Azir,the Emperor of the Sands,Mage,Marksman,Mana,16.18.1
+350,Yuumi,Yuumi,the Magical Cat,Support,Mage,Mana,16.18.1
+360,Samira,Samira,the Desert Rose,Marksman,Assassin,Mana,16.18.1
+412,Thresh,Thresh,the Chain Warden,Support,Tank,Mana,16.18.1
+420,Illaoi,Illaoi,the Kraken Priestess,Fighter,Tank,Mana,16.18.1
+421,RekSai,Rek'Sai,the Void Burrower,Fighter,Tank,Rage,16.18.1
+427,Ivern,Ivern,the Green Father,Support,Mage,Mana,16.18.1
+429,Kalista,Kalista,the Spear of Vengeance,Marksman,,Mana,16.18.1
+432,Bard,Bard,the Wandering Caretaker,Support,Mage,Mana,16.18.1
+497,Rakan,Rakan,The Charmer,Support,,Mana,16.18.1
+498,Xayah,Xayah,the Rebel,Marksman,,Mana,16.18.1
+516,Ornn,Ornn,The Fire below the Mountain,Tank,,Mana,16.18.1
+517,Sylas,Sylas,the Unshackled,Mage,Assassin,Mana,16.18.1
+518,Neeko,Neeko,the Curious Chameleon,Mage,Support,Mana,16.18.1
+523,Aphelios,Aphelios,the Weapon of the Faithful,Marksman,,Mana,16.18.1
+526,Rell,Rell,the Iron Maiden,Tank,Support,Mana,16.18.1
+555,Pyke,Pyke,the Bloodharbor Ripper,Support,Assassin,Mana,16.18.1
+711,Vex,Vex,the Gloomist,Mage,,Mana,16.18.1
+777,Yone,Yone,the Unforgotten,Fighter,Assassin,Flow,16.18.1
+799,Ambessa,Ambessa,Matriarch of War,Fighter,Assassin,Energy,16.18.1
+800,Mel,Mel,the Soul's Reflection,Mage,Support,Mana,16.18.1
+804,Yunara,Yunara,the Unbroken Faith,Marksman,,Mana,16.18.1
+805,Locke,Locke,the Ashen Exorcist,Assassin,Mage,Mana,16.18.1
+875,Sett,Sett,the Boss,Fighter,Tank,Grit,16.18.1
+876,Lillia,Lillia,the Bashful Bloom,Fighter,Mage,Mana,16.18.1
+887,Gwen,Gwen,The Hallowed Seamstress,Fighter,,Mana,16.18.1
+888,Renata,Renata Glasc,the Chem-Baroness,Support,Mage,Mana,16.18.1
+893,Aurora,Aurora,the Witch Between Worlds,Mage,Assassin,Mana,16.18.1
+895,Nilah,Nilah,the Joy Unbound,Fighter,Assassin,Mana,16.18.1
+897,KSante,K'Sante,the Pride of Nazumah,Tank,Fighter,Mana,16.18.1
+901,Smolder,Smolder,the Fiery Fledgling,Marksman,Mage,Mana,16.18.1
+902,Milio,Milio,The Gentle Flame,Support,Mage,Mana,16.18.1
+904,Zaahen,Zaahen,The Unsundered,Fighter,,Mana,16.18.1
+910,Hwei,Hwei,the Visionary,Mage,Support,Mana,16.18.1
+950,Naafiri,Naafiri,the Hound of a Hundred Bites,Assassin,Fighter,Mana,16.18.1
